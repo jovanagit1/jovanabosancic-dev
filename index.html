@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sr" data-lang="sr" data-theme="light">
+<html lang="en" data-lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,14 +19,14 @@
 @font-face { font-family: "Carlito"; src: url(carlito-latin-ext.woff2) format("woff2"); font-weight: 400; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 :root {
   --bg: #ffffff; --card: #f7f7f9; --ink: #17161c; --muted: #67646f; --line: #e9e8ee;
-  --accent: #5b3df5; --accent-soft: #ebe6ff; --accent-ink: #3a24b8; --footer: #17161a;
+  --accent: #5b3df5; --accent-soft: #ebe6ff; --accent-ink: #3a24b8; --footer: #17161a; --panel: #ffffff; --ink-soft: #4a4752;
   --serif: "Instrument Serif", Georgia, serif; --sans: Calibri, Carlito, "Segoe UI", system-ui, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, monospace;
   --calibri: "Calibri Light", Calibri, Carlito, "DM Sans", sans-serif;
 }
 [data-theme="dark"] {
   --bg: #141318; --card: #1d1c22; --ink: #f1eef7; --muted: #a29fab; --line: #2f2d36;
-  --accent: #9d8cff; --accent-soft: #29243f; --accent-ink: #cdc4ff; --footer: #0c0b0e;
+  --accent: #9d8cff; --accent-soft: #29243f; --accent-ink: #cdc4ff; --footer: #0c0b0e; --panel: #1d1c22; --ink-soft: #c4c0cc;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 18px; line-height: 1.6; transition: background .25s, color .25s; }
@@ -49,35 +49,69 @@ html.unlocked .lock-note, html.unlocked .lock-badge { display: none !important; 
 .lock-note button { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 14px; font: inherit; font-size: 13.5px; cursor: pointer; }
 .lock-note button:hover { border-color: var(--accent); }
 
-/* bočni meni */
-.sidebar { position: fixed; inset: 0 auto 0 0; width: 250px; padding: 28px 22px; display: flex; flex-direction: column; border-right: 1px solid var(--line); background: var(--bg); }
-.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-bottom: 44px; }
+/* gornja traka: lijevo jezik i kontakt, u sredini domen, desno meni */
+.site-header { position: sticky; top: 0; z-index: 40; background: var(--bg); background: color-mix(in srgb, var(--bg) 86%, transparent); -webkit-backdrop-filter: saturate(1.4) blur(12px); backdrop-filter: saturate(1.4) blur(12px); border-bottom: 1px solid var(--line); }
+.hdr { max-width: 1120px; margin: 0 auto; height: 68px; padding: 0 24px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+.brand { justify-self: center; display: flex; align-items: center; gap: 10px; text-decoration: none; animation: hdrDown .9s cubic-bezier(.2,.8,.2,1) both; }
 .logo { width: 34px; height: 34px; flex: none; }
-.brand-text { font-family: var(--mono); font-size: 13.5px; font-weight: 500; }
+.brand-text { font-family: var(--mono); font-size: 15px; font-weight: 500; white-space: nowrap; }
 .brand-text b { color: var(--accent); font-weight: 500; }
-.menu { list-style: none; display: grid; gap: 4px; }
-.menu a { display: flex; align-items: center; gap: 12px; padding: 7px 12px; font-size: 16.5px; color: var(--muted); text-decoration: none; border-left: 2px solid transparent; }
-.menu a:hover { color: var(--ink); }
-.menu a[aria-current="page"] { color: var(--ink); border-left-color: var(--accent); font-weight: 500; }
-.menu svg { width: 17px; height: 17px; flex: none; }
+@keyframes hdrDown { from { opacity: 0; transform: translateY(-16px); } }
+@keyframes hdrLeft { from { opacity: 0; transform: translateX(-28px); } }
+@keyframes hdrRight { from { opacity: 0; transform: translateX(28px); } }
+.dd { position: relative; }
+.dd-left { justify-self: start; animation: hdrLeft .9s cubic-bezier(.2,.8,.2,1) .15s both; }
+.dd-right { justify-self: end; animation: hdrRight .9s cubic-bezier(.2,.8,.2,1) .15s both; }
+.dd::after { content: ""; position: absolute; left: -12px; right: -12px; top: 100%; height: 16px; }
+.dd-btn { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); color: var(--ink); font-family: var(--mono); font-size: 13px; cursor: pointer; transition: border-color .2s; }
+.dd-btn:hover, .dd.open .dd-btn { border-color: var(--accent); }
+.dd-btn svg { width: 17px; height: 17px; flex: none; }
+.dd-btn .chev { display: inline-flex; }
+.dd-btn .chev svg { width: 14px; height: 14px; transition: transform .5s ease; }
+.dd.open .chev svg { transform: rotate(180deg); }
+.dd-panel { position: absolute; top: calc(100% + 14px); width: 292px; max-width: calc(100vw - 24px); padding: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 28px 60px -28px rgba(23,22,28,.38);
+  opacity: 0; visibility: hidden; transform: translateY(-10px); clip-path: inset(0 0 100% 0 round 18px);
+  transition: clip-path .8s cubic-bezier(.22,.9,.24,1), transform .8s cubic-bezier(.22,.9,.24,1), opacity .5s ease, visibility 0s linear .8s; }
+.dd-left .dd-panel { left: 0; }
+.dd-right .dd-panel { right: 0; width: 250px; }
+.dd.open .dd-panel { opacity: 1; visibility: visible; transform: none; clip-path: inset(0 0 0 0 round 18px); transition-delay: 0s; }
+.dd-panel .stag { opacity: 0; transform: translateY(-8px); transition: opacity .45s ease, transform .45s ease; }
+.dd.open .dd-panel .stag { opacity: 1; transform: none; transition-delay: calc(var(--i, 0) * 70ms + 120ms); }
+@media (hover: hover) and (pointer: fine) {
+  .dd:not(.nohover):hover .dd-panel { opacity: 1; visibility: visible; transform: none; clip-path: inset(0 0 0 0 round 18px); transition-delay: 0s; }
+  .dd:not(.nohover):hover .dd-panel .stag { opacity: 1; transform: none; transition-delay: calc(var(--i, 0) * 70ms + 120ms); }
+  .dd:not(.nohover):hover .dd-btn { border-color: var(--accent); }
+  .dd:not(.nohover):hover .chev svg { transform: rotate(180deg); }
+}
+.dd-title { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 8px 10px 6px; }
+.dd-langs { display: grid; gap: 2px; }
+.dd-langs button, .dd-link, .dd-theme { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border: 0; border-radius: 10px; background: none; color: var(--ink); font: inherit; font-size: 15.5px; text-align: left; text-decoration: none; cursor: pointer; }
+.dd-langs button b { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--muted); width: 22px; }
+.dd-langs button:hover, .dd-link:hover, .dd-theme:hover { background: var(--card); }
+html[data-lang="sr"] .dd-langs .sr, html[data-lang="en"] .dd-langs .en, html[data-lang="de"] .dd-langs .de { background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; }
+html[data-lang="sr"] .dd-langs .sr b, html[data-lang="en"] .dd-langs .en b, html[data-lang="de"] .dd-langs .de b { color: var(--accent); }
+.dd-link svg, .dd-theme svg { width: 17px; height: 17px; color: var(--accent); flex: none; }
+.dd-link span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dd-link .short { display: none; }
+.dd-theme { margin-top: 6px; border-top: 1px solid var(--line); border-radius: 0 0 10px 10px; padding-top: 12px; }
+.dd-theme .switch { margin-left: auto; width: 36px; height: 20px; border-radius: 999px; background: var(--line); position: relative; transition: background .3s; flex: none; }
+.dd-theme .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .3s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+[data-theme="dark"] .dd-theme .switch { background: var(--accent); }
+[data-theme="dark"] .dd-theme .switch::after { transform: translateX(16px); }
+.menu { list-style: none; display: grid; gap: 2px; }
+.menu a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; font-size: 16.5px; color: var(--ink); text-decoration: none; }
+.menu a:hover { background: var(--card); }
+.menu a[aria-current="page"] { background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; }
+.menu svg { width: 18px; height: 18px; flex: none; color: var(--muted); }
 .menu a[aria-current="page"] svg { color: var(--accent); }
-.side-bottom { margin-top: auto; display: grid; gap: 16px; }
-.socials { display: flex; gap: 14px; }
-.socials a { color: var(--muted); display: inline-flex; }
-.socials a:hover { color: var(--accent); }
-.socials svg { width: 18px; height: 18px; }
-.toggles { display: flex; align-items: center; gap: 10px; }
-.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; font-family: var(--mono); font-size: 12px; }
-.lang button { border: 0; background: transparent; color: var(--muted); padding: 5px 9px; cursor: pointer; font: inherit; }
-html[data-lang="sr"] .lang .sr, html[data-lang="en"] .lang .en, html[data-lang="de"] .lang .de { background: var(--card); color: var(--accent); font-weight: 500; }
-.theme-btn { border: 0; background: none; color: var(--muted); cursor: pointer; display: inline-flex; padding: 4px; }
-.theme-btn:hover { color: var(--ink); }
-.theme-btn svg { width: 18px; height: 18px; }
-.topbar { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .brand, .dd-left, .dd-right { animation: none; }
+  .dd-panel, .dd-panel .stag { transition-duration: .01s !important; transition-delay: 0s !important; }
+}
 
 /* sadržaj */
-main { margin-left: 250px; padding: 64px 56px 90px; min-height: 100vh; }
-.inner { max-width: 760px; }
+main { padding: 56px 24px 90px; min-height: 100vh; }
+.inner { max-width: 820px; margin: 0 auto; }
 .view { animation: fade .35s ease; }
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .prompt { font-family: var(--mono); font-size: 14.5px; color: var(--accent); }
@@ -127,8 +161,8 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .project .shot img { width: 100%; height: 100%; object-fit: cover; object-position: top; transition: transform .5s ease; }
 .project:hover .shot img { transform: scale(1.03); }
 .logo-panel { position: relative; aspect-ratio: 16 / 6; display: grid; place-items: center; overflow: hidden; color: #fff; background: radial-gradient(120% 140% at 20% 0%, #2b2547 0%, #0d0c10 55%, #08080a 100%); }
-.logo-panel .client-mark { width: min(62%, 430px); height: auto; }
-.logo-panel img { width: min(72%, 500px); height: auto; }
+.logo-panel .client-mark { width: min(56%, 400px); height: auto; }
+.logo-panel img { width: min(56%, 400px); height: auto; }
 .project .shot.self { aspect-ratio: 16 / 5; display: grid; place-items: center; background: linear-gradient(135deg, #5b3df5, #b07cff 60%, #ffb38a); }
 .project .shot.self span { font-family: var(--mono); color: #fff; font-size: clamp(18px, 3.4vw, 28px); }
 .lock-badge { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; gap: 8px; background: rgba(20,19,24,.72); color: #fff; backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding: 9px 16px; font-size: 13.5px; cursor: pointer; font-family: var(--sans); }
@@ -154,7 +188,7 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 /* CV */
 .cv-head { padding-bottom: 26px; border-bottom: 1px solid var(--line); }
 .cv-head h1 { margin-top: 8px; }
-.cv-head .sub { font-family: var(--calibri); font-weight: 300; font-size: 22px; color: var(--ink); margin: 6px 0 16px; letter-spacing: .005em; }
+.cv-head .sub { font-family: var(--calibri); font-weight: 300; font-size: 22px; color: var(--ink-soft); margin: 6px 0 16px; letter-spacing: .005em; }
 .contact-row { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14.5px; color: var(--muted); }
 .contact-row > * { display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }
 .contact-row a:hover { color: var(--ink); }
@@ -199,34 +233,58 @@ a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .modal-err { color: #d23b3b; font-size: 13.5px; margin-top: 8px; min-height: 1.2em; }
 .modal-close { float: right; border: 0; background: none; color: var(--muted); font-size: 22px; cursor: pointer; line-height: 1; }
 
-footer { margin-left: 250px; background: var(--footer); color: #f1eef7; padding: 40px 56px; }
+footer { background: var(--footer); color: #f1eef7; padding: 40px 24px; }
+footer .finner { max-width: 820px; margin: 0 auto; }
 footer .name { font-family: var(--serif); font-size: 30px; }
 footer small { font-family: var(--mono); font-size: 12px; color: #9a97a3; }
 
+/* početna – centrirano */
+.hero { flex-direction: column; align-items: center; text-align: center; gap: 0; margin: 4px 0 30px; }
+.photo { width: 132px; height: 132px; margin-bottom: 22px; outline-width: 5px; }
+.hero h1 { margin: 0 0 14px; }
+.hero .prompt { font-size: 15.5px; margin-bottom: 10px; }
+.home-meta { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 13.5px; color: var(--muted); margin: 0; }
+.home-meta svg { width: 15px; height: 15px; color: var(--accent); flex: none; }
+.status { margin-top: 12px; display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: #1f9d55; }
+[data-theme="dark"] .status { color: #5ddc95; }
+.status i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; animation: softblink 1.8s ease-in-out infinite; }
+@keyframes softblink { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+#view-home .intro { text-align: center; max-width: 660px; margin: 0 auto; color: var(--muted); font-size: 20.5px; line-height: 1.55; }
+.lead-title { font-size: clamp(30px, 4.2vw, 46px); line-height: 1.15; margin: 4px 0 34px; }
+#view-home .actions { justify-content: center; }
+#view-home h2 { text-align: center; }
+#view-home .chips { justify-content: center; }
+
 @media (max-width: 860px) {
-  .sidebar { position: fixed; inset: 0; width: auto; z-index: 30; background: var(--bg); padding: 90px 28px 32px; transform: translateX(-100%); transition: transform .3s ease; }
-  body.menu-open .sidebar { transform: none; }
-  .sidebar .brand { display: none; }
-  .menu a { font-size: 19px; padding: 12px 14px; }
-  .topbar { display: flex; position: sticky; top: 0; z-index: 40; align-items: center; justify-content: space-between; padding: 14px 20px; background: var(--bg); border-bottom: 1px solid var(--line); }
-  .burger { border: 1px solid var(--line); background: var(--card); border-radius: 10px; width: 42px; height: 38px; display: grid; place-items: center; cursor: pointer; color: var(--ink); }
-  .burger svg { width: 20px; height: 20px; }
-  main { margin-left: 0; padding: 40px 22px 70px; }
-  footer { margin-left: 0; padding: 32px 22px; }
-  .hero { flex-direction: column; align-items: flex-start; gap: 22px; }
-  .photo { width: 128px; height: 128px; }
+  main { padding: 36px 18px 70px; }
+  footer { padding: 32px 18px; }
+  .photo { width: 112px; height: 112px; }
   .cards { grid-template-columns: 1fr; }
   .tiles { grid-template-columns: 1fr; }
   .entry-top { flex-direction: column; gap: 2px; }
   .actions { justify-content: flex-start; }
   .project .body { padding: 20px; }
 }
+@media (max-width: 640px) {
+  .hdr { height: 60px; padding: 0 12px; gap: 8px; }
+  .brand { gap: 8px; }
+  .logo { width: 28px; height: 28px; }
+  .brand-text { font-size: 12px; }
+  .dd-btn { height: 38px; padding: 0 11px; gap: 6px; }
+  .dd-word, .dd-btn .chev { display: none; }
+  .brand-text { font-size: 13.5px; }
+  .dd-panel, .dd-right .dd-panel { width: calc(50vw - 18px); padding: 8px; }
+  .dd-langs button, .dd-link, .dd-theme, .menu a { font-size: 15px; padding: 9px 8px; gap: 8px; }
+  .dd-link .full { display: none; }
+  .dd-link .short { display: inline; }
+  .dd-theme svg { display: none; }
+}
 
 .print-only { display: none; }
 @media print {
   @page { size: A4; margin: 12mm 15mm; }
   html, body { background: #fff !important; color: #1b1a1f !important; font-size: 9.6pt; line-height: 1.38; }
-  .sidebar, .topbar, footer, .no-print, .view, .modal { display: none !important; }
+  .site-header, footer, .no-print, .view, .modal { display: none !important; }
   #view-cv { display: block !important; animation: none; }
   .print-only { display: block !important; }
   main { margin: 0; padding: 0; min-height: 0; }
@@ -261,44 +319,48 @@ footer small { font-family: var(--mono); font-size: 12px; color: #9a97a3; }
 </style>
 </head>
 <body>
-  <div class="topbar">
-    <a href="#home" class="brand" style="margin:0"><svg class="logo" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="10" fill="#5b3df5"/><text x="17" y="23" text-anchor="middle" font-family="Instrument Serif,Georgia,serif" font-size="17" fill="#fff">JB</text></svg><span class="brand-text">jovana<b>bosancic</b>.dev</span></a>
-    <button class="burger" id="burger" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-  </div>
-  <aside class="sidebar">
-    <a href="#home" class="brand"><svg class="logo" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="10" fill="#5b3df5"/><text x="17" y="23" text-anchor="middle" font-family="Instrument Serif,Georgia,serif" font-size="17" fill="#fff">JB</text></svg><span class="brand-text">jovana<b>bosancic</b>.dev</span></a>
-    <nav><ul class="menu"><li><a href="#home" data-view="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg><span lang="sr">Početna</span><span lang="en">Home</span><span lang="de">Start</span></a></li><li><a href="#cv" data-view="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg><span lang="sr">Moj CV</span><span lang="en">Resume</span><span lang="de">Lebenslauf</span></a></li><li><a href="#projects" data-view="projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span lang="sr">Projekti</span><span lang="en">Projects</span><span lang="de">Projekte</span></a></li><li><a href="#services" data-view="services"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg><span lang="sr">Šta radim</span><span lang="en">What I do</span><span lang="de">Leistungen</span></a></li><li><a href="#contact" data-view="contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg><span lang="sr">Kontakt</span><span lang="en">Contact</span><span lang="de">Kontakt</span></a></li></ul></nav>
-    <div class="side-bottom">
-      <div class="socials">
-        <a href="https://github.com/jovanagit1" target="_blank" rel="noopener" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.58.23 2.75.11 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg></a>
-        <a href="https://www.linkedin.com/in/jovana-bosancic-74ba67257/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13M7.12 20.45H3.56V9h3.56zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0"/></svg></a>
-        <a href="mailto:business@jovanabosancic.dev" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg></a>
+  <header class="site-header">
+    <div class="hdr">
+      <div class="dd dd-left" data-dd>
+        <button type="button" class="dd-btn" aria-expanded="false" aria-haspopup="true" aria-label="Language / contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg><span class="dd-code"><span lang="sr">SR</span><span lang="en">EN</span><span lang="de">DE</span></span><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></button>
+        <div class="dd-panel">
+          <p class="dd-title stag" style="--i:0"><span lang="sr">Jezik</span><span lang="en">Language</span><span lang="de">Sprache</span></p>
+          <div class="dd-langs stag" style="--i:1">
+            <button type="button" class="sr" data-set-lang="sr"><b>SR</b>Srpski</button>
+            <button type="button" class="en" data-set-lang="en"><b>EN</b>English</button>
+            <button type="button" class="de" data-set-lang="de"><b>DE</b>Deutsch</button>
+          </div>
+          <p class="dd-title stag" style="--i:2"><span lang="sr">Kontakt</span><span lang="en">Contact</span><span lang="de">Kontakt</span></p>
+          <a class="dd-link stag" style="--i:3" href="mailto:jovana@jovanabosancic.dev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg><span class="full">jovana@jovanabosancic.dev</span><span class="short">E-mail</span></a>
+          <a class="dd-link stag" style="--i:4" href="https://www.linkedin.com/in/jovana-bosancic-74ba67257/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13M7.12 20.45H3.56V9h3.56zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0"/></svg><span>LinkedIn</span></a>
+          <button type="button" class="dd-theme stag" style="--i:5" id="themeBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span><span lang="sr">Tamna tema</span><span lang="en">Dark mode</span><span lang="de">Dark Mode</span></span><span class="switch" aria-hidden="true"></span></button>
+        </div>
       </div>
-      <div class="toggles">
-        <div class="lang"><button class="sr" data-set-lang="sr">SR</button><button class="en" data-set-lang="en">EN</button><button class="de" data-set-lang="de">DE</button></div>
-        <button class="theme-btn" id="themeBtn" aria-label="Dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+      <a href="#home" class="brand"><span class="brand-text">jovana<b>bosancic</b>.dev</span></a>
+      <div class="dd dd-right" data-dd>
+        <button type="button" class="dd-btn" aria-expanded="false" aria-haspopup="true" aria-label="Menu"><span class="dd-word"><span lang="sr">Meni</span><span lang="en">Menu</span><span lang="de">Menü</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+        <nav class="dd-panel"><ul class="menu"><li class="stag" style="--i:0"><a href="#home" data-view="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg><span lang="sr">Početna</span><span lang="en">Home</span><span lang="de">Start</span></a></li><li class="stag" style="--i:1"><a href="#cv" data-view="cv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg><span lang="sr">Moj CV</span><span lang="en">Resume</span><span lang="de">Lebenslauf</span></a></li><li class="stag" style="--i:2"><a href="#projects" data-view="projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span lang="sr">Projekti</span><span lang="en">Projects</span><span lang="de">Projekte</span></a></li><li class="stag" style="--i:3"><a href="#services" data-view="services"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg><span lang="sr">Oblasti rada</span><span lang="en">Expertise</span><span lang="de">Kompetenzen</span></a></li><li class="stag" style="--i:4"><a href="#contact" data-view="contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg><span lang="sr">Kontakt</span><span lang="en">Contact</span><span lang="de">Kontakt</span></a></li></ul></nav>
       </div>
     </div>
-  </aside>
+  </header>
   <main><div class="inner">
 
 <section class="view" id="view-home">
   <div class="hero">
     <div class="photo"><span>JB</span><img src="slika.jpg" alt="Jovana Bosančić" onerror="this.remove()"></div>
-    <div>
-      <p class="prompt">&gt; <span lang="sr">programerka i web dizajnerka</span><span lang="en">software developer &amp; web designer</span><span lang="de">Softwareentwicklerin &amp; Webdesignerin</span><span class="cursor"></span></p>
-      <h1><span lang="sr">Zdravo, ja sam <em>Jovana</em></span><span lang="en">Hi, I'm <em>Jovana</em></span><span lang="de">Hallo, ich bin <em>Jovana</em></span></h1>
-      <p class="home-meta">Banja Luka · remote · SR / EN / DE</p>
-    </div>
+    <h1><span lang="sr">Zdravo, ja sam <em>Jovana</em></span><span lang="en">Hi, I'm <em>Jovana</em></span><span lang="de">Hallo, ich bin <em>Jovana</em></span></h1>
+    <p class="prompt">&gt; <span lang="sr">Programer i web dizajner</span><span lang="en">Software developer &amp; web designer</span><span lang="de">Softwareentwicklerin &amp; Webdesignerin</span><span class="cursor"></span></p>
+    <p class="home-meta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Banja Luka, <span lang="sr">BiH</span><span lang="en">Bosnia and Herzegovina</span><span lang="de">Bosnien und Herzegowina</span></p>
+    <p class="status"><i></i><span lang="sr">U potrazi za remote poslom</span><span lang="en">Open to remote work</span><span lang="de">Offen für Remote-Arbeit</span></p>
   </div>
-  <p class="intro"><span lang="sr">Pravim web sajtove, aplikacije, programe za rad i AI asistente za firme, sa jednakom pažnjom na kod i na estetiku.</span><span lang="en">I build websites, apps, business software and AI assistants, with equal care for code and aesthetics.</span><span lang="de">Ich entwickle Websites, Apps, Unternehmenssoftware und KI-Assistenten – mit gleicher Sorgfalt für Code und Ästhetik.</span></p>
-  <div class="actions" style="justify-content:flex-start">
+  <p class="intro"><span lang="sr">Dizajn i izrada web sajtova, aplikacija, programa za rad i AI asistenata – uz jednaku posvećenost kodu i estetici.</span><span lang="en">Design and development of websites, apps, business software and AI assistants – with equal attention to code and aesthetics.</span><span lang="de">Design und Entwicklung von Websites, Apps, Unternehmenssoftware und KI-Assistenten – mit gleicher Sorgfalt für Code und Ästhetik.</span></p>
+  <div class="actions">
     <a class="btn solid" href="#cv"><span lang="sr">Pogledaj CV</span><span lang="en">View resume</span><span lang="de">Lebenslauf ansehen</span> →</a>
     <a class="btn" href="#projects"><span lang="sr">Projekti</span><span lang="en">Projects</span><span lang="de">Projekte</span> →</a>
   </div>
   <h2>// <span lang="sr">programski jezici</span><span lang="en">programming languages</span><span lang="de">Programmiersprachen</span></h2>
   <div class="chips"><span class="chip">C</span><span class="chip">C++</span><span class="chip">C#</span><span class="chip">Java</span><span class="chip">Python</span></div>
-  <h2>// <span lang="sr">šta radim</span><span lang="en">what I do</span><span lang="de">was ich mache</span></h2>
+  <h2>// <span lang="sr">usluge</span><span lang="en">services</span><span lang="de">Leistungen</span></h2>
   <div class="tiles">
     <a class="tile" href="#services"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg></span><span lang="sr">Web sajtovi</span><span lang="en">Websites</span><span lang="de">Websites</span></a>
     <a class="tile" href="#services"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></span><span lang="sr">Web i mobilne aplikacije</span><span lang="en">Web &amp; mobile apps</span><span lang="de">Web- &amp; Mobile-Apps</span></a>
@@ -316,16 +378,16 @@ footer small { font-family: var(--mono); font-size: 12px; color: #9a97a3; }
     <p class="sub">Jovana Bosančić – <span lang="sr">Programiranje i softverski inženjering</span><span lang="en">Programming and Software Engineering</span><span lang="de">Programmierung und Software-Engineering</span></p>
     
 <div class="contact-row">
-  <a href="mailto:business@jovanabosancic.dev"><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg></span>business@jovanabosancic.dev</a>
+  <a href="mailto:jovana@jovanabosancic.dev"><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg></span>jovana@jovanabosancic.dev</a>
   <span><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M5 4h3.5l1.8 4.5-2.3 1.4a11 11 0 0 0 6.1 6.1l1.4-2.3L20 15.5V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.6 1.5 1.5 0 0 1 5 4z"/></svg></span><button type="button" class="locked" data-lock="phone" aria-label="Locked"><span class="blurtext" aria-hidden="true">+387 00 000 000</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button></span>
   <a href="https://jovanabosancic.dev"><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg></span>jovanabosancic.dev</a>
   <a href="https://github.com/jovanagit1" target="_blank" rel="noopener"><span class="ci"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.58.23 2.75.11 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg></span>jovanagit1</a>
   <a href="https://www.linkedin.com/in/jovana-bosancic-74ba67257/" target="_blank" rel="noopener"><span class="ci"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13M7.12 20.45H3.56V9h3.56zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0"/></svg></span>LinkedIn</a>
 </div>
-    <p class="print-note print-only"><span lang="sr">Broj telefona i nazivi klijenata dostupni su na zahtjev: business@jovanabosancic.dev</span><span lang="en">Phone number and client names are available on request: business@jovanabosancic.dev</span><span lang="de">Telefonnummer und Kundennamen auf Anfrage: business@jovanabosancic.dev</span></p>
-    <div class="lock-note no-print"><span class="txt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span><span lang="sr">Pojedini podaci, poput broja telefona i naziva klijenata, dostupni su na zahtjev. Za uvid u zaključane stavke pišite na <a class="mail-small" href="mailto:business@jovanabosancic.dev">business@jovanabosancic.dev</a>.</span><span lang="en">Some details, such as my phone number and client names, are available on request. To view the restricted items, please email <a class="mail-small" href="mailto:business@jovanabosancic.dev">business@jovanabosancic.dev</a>.</span><span lang="de">Einige Angaben, wie meine Telefonnummer und Kundennamen, sind auf Anfrage verfügbar. Für den Zugang zu den geschützten Inhalten schreiben Sie bitte an <a class="mail-small" href="mailto:business@jovanabosancic.dev">business@jovanabosancic.dev</a>.</span></span></span><button type="button" data-open-unlock><span lang="sr">Imam pristupni kod</span><span lang="en">I have an access code</span><span lang="de">Ich habe einen Zugangscode</span></button></div>
+    <p class="print-note print-only"><span lang="sr">Broj telefona i nazivi klijenata dostupni su na zahtjev: info@jovanabosancic.dev</span><span lang="en">Phone number and client names are available on request: info@jovanabosancic.dev</span><span lang="de">Telefonnummer und Kundennamen auf Anfrage: info@jovanabosancic.dev</span></p>
+    <div class="lock-note no-print"><span class="txt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span><span lang="sr">Pojedini podaci, poput broja telefona i naziva klijenata, dostupni su na zahtjev. Za uvid u zaključane stavke pišite na <a class="mail-small" href="mailto:info@jovanabosancic.dev">info@jovanabosancic.dev</a>.</span><span lang="en">Some details, such as my phone number and client names, are available on request. To view the restricted items, please email <a class="mail-small" href="mailto:info@jovanabosancic.dev">info@jovanabosancic.dev</a>.</span><span lang="de">Einige Angaben, wie meine Telefonnummer und Kundennamen, sind auf Anfrage verfügbar. Für den Zugang zu den geschützten Inhalten schreiben Sie bitte an <a class="mail-small" href="mailto:info@jovanabosancic.dev">info@jovanabosancic.dev</a>.</span></span></span><button type="button" data-open-unlock><span lang="sr">Imam pristupni kod</span><span lang="en">I have an access code</span><span lang="de">Ich habe einen Zugangscode</span></button></div>
     <div class="cv-actions no-print">
-      <a class="btn accent" id="cvDownload" href="Jovana_Bosancic_CV_SR.pdf" download><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg><span lang="sr">Preuzmi CV (PDF)</span><span lang="en">Download CV (PDF)</span><span lang="de">Lebenslauf herunterladen (PDF)</span></a>
+      <a class="btn accent" id="cvDownload" href="Jovana_Bosancic_CV_EN.pdf" download><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg><span lang="sr">Preuzmi CV (PDF)</span><span lang="en">Download CV (PDF)</span><span lang="de">Lebenslauf herunterladen (PDF)</span></a>
     </div>
   </div>
 
@@ -337,14 +399,14 @@ footer small { font-family: var(--mono); font-size: 12px; color: #9a97a3; }
 
   <div class="cv-section">
     <h2 class="big"><span lang="sr">Iskustvo</span><span lang="en">Experience</span><span lang="de">Berufserfahrung</span></h2>
-    <div class="entry"><div class="entry-top"><h3><span lang="sr">Freelance web developer i dizajnerka</span><span lang="en">Freelance Web Developer &amp; Designer</span><span lang="de">Freiberufliche Webentwicklerin &amp; Designerin</span></h3><span class="when"><span class="todo">20XX</span> — <span lang="sr">danas</span><span lang="en">present</span><span lang="de">heute</span></span></div><p class="where"><span lang="sr">Fizička i pravna lica, korporacije i međunarodni klijenti</span><span lang="en">Individuals, companies, corporations and international clients</span><span lang="de">Privatpersonen, Unternehmen, Konzerne und internationale Kunden</span></p><ul lang="sr"><li>Izrada različitih softverskih rješenja i programa za rad za fizička i pravna lica i korporacije</li><li>Sajt i admin panel za auto salon, sa AI videom vozila (Higgsfield, Kling AI)</li><li>Trojezični sajt (engleski, japanski, kineski) za međunarodnog klijenta, školu snowboarda i skijanja u Japanu</li></ul><ul lang="en"><li>Building a range of software solutions and business software for individuals, companies and corporations</li><li>Website and admin panel for a car dealership, featuring AI-generated vehicle video (Higgsfield, Kling AI)</li><li>Trilingual website (English, Japanese, Chinese) for an international client, a snowboard and ski school in Japan</li></ul><ul lang="de"><li>Entwicklung verschiedener Softwarelösungen und Unternehmenssoftware für Privatpersonen, Unternehmen und Konzerne</li><li>Website und Admin-Panel für ein Autohaus, mit KI-generiertem Fahrzeugvideo (Higgsfield, Kling AI)</li><li>Dreisprachige Website (Englisch, Japanisch, Chinesisch) für einen internationalen Kunden, eine Snowboard- und Skischule in Japan</li></ul></div>
-    <div class="entry"><div class="entry-top"><h3><span lang="sr">Prodajni savjetnik</span><span lang="en">Sales Advisor</span><span lang="de">Verkaufsberaterin</span></h3><span class="when"><span class="todo">20XX</span> — <span lang="sr">danas</span><span lang="en">present</span><span lang="de">heute</span></span></div><p class="where">HALOO d.o.o. · <span lang="sr">telekomunikacije, Bosna i Hercegovina</span><span lang="en">telecommunications, Bosnia and Herzegovina</span><span lang="de">Telekommunikation, Bosnien und Herzegowina</span></p><ul lang="sr"><li>Savjetovanje i prodaja tarifa i usluga mobilne telefonije</li><li>Rješavanje svih vrsta problema mobilne telefonije, mobilnih telefona i popravke kartica</li><li>Priprema ugovora sa korisnicima i obuka kolega za nove ponude</li></ul><ul lang="en"><li>Advising customers on and selling mobile plans and services</li><li>Resolving all kinds of mobile telephony and phone issues, including SIM card repairs</li><li>Preparing customer contracts and training colleagues on new offers</li></ul><ul lang="de"><li>Beratung und Verkauf von Mobilfunktarifen und -diensten</li><li>Lösung aller Arten von Mobilfunk- und Handyproblemen, einschließlich SIM-Karten-Reparaturen</li><li>Vorbereitung von Kundenverträgen und Schulung von Kollegen zu neuen Angeboten</li></ul></div>
-    <div class="entry"><div class="entry-top"><h3>Room Attendant</h3><span class="when"><span class="todo">20XX</span></span></div><p class="where">Holland America-Princess · Mt. McKinley Princess Wilderness Lodge · <span lang="sr">Aljaska, SAD</span><span lang="en">Alaska, USA</span><span lang="de">Alaska, USA</span></p><ul lang="sr"><li>Prvo radno iskustvo: priprema i održavanje soba prema standardima hotela, uz svakodnevni rad na engleskom</li></ul><ul lang="en"><li>First job: preparing and maintaining guest rooms to the lodge's standards, working in English every day</li></ul><ul lang="de"><li>Erster Job: Vorbereitung und Pflege der Gästezimmer nach den Standards der Lodge, täglich auf Englisch</li></ul></div>
+    <div class="entry"><div class="entry-top"><h3><span lang="sr">Freelance web developer i dizajner</span><span lang="en">Freelance Web Developer &amp; Designer</span><span lang="de">Freiberufliche Webentwicklerin &amp; Designerin</span></h3><span class="when">2026</span></div><p class="where"><span lang="sr">Fizička i pravna lica, korporacije i međunarodni klijenti</span><span lang="en">Individuals, companies, corporations and international clients</span><span lang="de">Privatpersonen, Unternehmen, Konzerne und internationale Kunden</span></p><ul lang="sr"><li>Izrada različitih softverskih rješenja i programa za rad za fizička i pravna lica i korporacije</li><li>Sajt i admin panel za auto salon, sa AI videom vozila (Higgsfield, Kling AI)</li><li>Trojezični sajt (engleski, japanski, kineski) za međunarodnog klijenta, školu snowboarda i skijanja u Japanu</li></ul><ul lang="en"><li>Building a range of software solutions and business software for individuals, companies and corporations</li><li>Website and admin panel for a car dealership, featuring AI-generated vehicle video (Higgsfield, Kling AI)</li><li>Trilingual website (English, Japanese, Chinese) for an international client, a snowboard and ski school in Japan</li></ul><ul lang="de"><li>Entwicklung verschiedener Softwarelösungen und Unternehmenssoftware für Privatpersonen, Unternehmen und Konzerne</li><li>Website und Admin-Panel für ein Autohaus, mit KI-generiertem Fahrzeugvideo (Higgsfield, Kling AI)</li><li>Dreisprachige Website (Englisch, Japanisch, Chinesisch) für einen internationalen Kunden, eine Snowboard- und Skischule in Japan</li></ul></div>
+    <div class="entry"><div class="entry-top"><h3><span lang="sr">Prodajni savjetnik</span><span lang="en">Sales Advisor</span><span lang="de">Verkaufsberaterin</span></h3><span class="when">2025 — <span lang="sr">danas</span><span lang="en">present</span><span lang="de">heute</span></span></div><p class="where">HALOO d.o.o. · <span lang="sr">telekomunikacije, Bosna i Hercegovina</span><span lang="en">telecommunications, Bosnia and Herzegovina</span><span lang="de">Telekommunikation, Bosnien und Herzegowina</span></p><ul lang="sr"><li>Savjetovanje i prodaja tarifa i usluga mobilne telefonije</li><li>Rješavanje svih vrsta problema mobilne telefonije, mobilnih telefona i popravke kartica</li><li>Priprema ugovora sa korisnicima i obuka kolega za nove ponude</li></ul><ul lang="en"><li>Advising customers on and selling mobile plans and services</li><li>Resolving all kinds of mobile telephony and phone issues, including SIM card repairs</li><li>Preparing customer contracts and training colleagues on new offers</li></ul><ul lang="de"><li>Beratung und Verkauf von Mobilfunktarifen und -diensten</li><li>Lösung aller Arten von Mobilfunk- und Handyproblemen, einschließlich SIM-Karten-Reparaturen</li><li>Vorbereitung von Kundenverträgen und Schulung von Kollegen zu neuen Angeboten</li></ul></div>
+    <div class="entry"><div class="entry-top"><h3>Room Attendant</h3><span class="when">2025</span></div><p class="where">Holland America-Princess · Mt. McKinley Princess Wilderness Lodge · <span lang="sr">Aljaska, SAD</span><span lang="en">Alaska, USA</span><span lang="de">Alaska, USA</span></p><ul lang="sr"><li>Prvo radno iskustvo: priprema i održavanje soba prema standardima hotela, uz svakodnevni rad na engleskom</li></ul><ul lang="en"><li>First job: preparing and maintaining guest rooms to the lodge's standards, working in English every day</li></ul><ul lang="de"><li>Erster Job: Vorbereitung und Pflege der Gästezimmer nach den Standards der Lodge, täglich auf Englisch</li></ul></div>
   </div>
 
   <div class="cv-section">
     <h2 class="big"><span lang="sr">Predavanja</span><span lang="en">Talks</span><span lang="de">Vorträge</span></h2>
-    <div class="entry"><div class="entry-top"><h3>“Intelligent Assistants for Enhancing Developer Productivity”</h3><span class="when">2024</span></div><p class="where"><span lang="sr">Govornica na radionici · Würzburg, Njemačka</span><span lang="en">Speaker at a workshop · Würzburg, Germany</span><span lang="de">Referentin bei einem Workshop · Würzburg, Deutschland</span></p></div>
+    <div class="entry"><div class="entry-top"><h3>“Intelligent Assistants for Enhancing Developer Productivity”</h3><span class="when">2024</span></div><p class="where"><span lang="sr">Govornik na radionici · Würzburg, Njemačka</span><span lang="en">Speaker at a workshop · Würzburg, Germany</span><span lang="de">Referentin bei einem Workshop · Würzburg, Deutschland</span></p></div>
   </div>
 
   <div class="cv-section">
@@ -356,7 +418,7 @@ footer small { font-family: var(--mono); font-size: 12px; color: #9a97a3; }
     <h2 class="big"><span lang="sr">Jezici</span><span lang="en">Languages</span><span lang="de">Sprachen</span></h2>
     <div class="lang-rows">
       <div class="lang-row"><span><span lang="sr">Srpski i balkanski jezici</span><span lang="en">Serbian &amp; Balkan languages</span><span lang="de">Serbisch &amp; Balkansprachen</span></span><span><span lang="sr">maternji</span><span lang="en">native</span><span lang="de">Muttersprache</span></span></div>
-      <div class="lang-row"><span><span lang="sr">Engleski</span><span lang="en">English</span><span lang="de">Englisch</span></span><span><span lang="sr">vrlo dobro</span><span lang="en">very good</span><span lang="de">sehr gut</span></span></div>
+      <div class="lang-row"><span><span lang="sr">Engleski</span><span lang="en">English</span><span lang="de">Englisch</span></span><span>C1</span></div>
       <div class="lang-row"><span><span lang="sr">Njemački</span><span lang="en">German</span><span lang="de">Deutsch</span></span><span>A1</span></div>
     </div>
   </div>
@@ -366,7 +428,7 @@ footer small { font-family: var(--mono); font-size: 12px; color: #9a97a3; }
   <p class="eyebrow">// <span lang="sr">radovi</span><span lang="en">work</span><span lang="de">Arbeiten</span></p>
   <h1 style="margin:10px 0 18px"><span lang="sr">Projekti</span><span lang="en">Projects</span><span lang="de">Projekte</span></h1>
   <p class="intro"><span lang="sr">Izbor projekata, sa onim što je urađeno i vještinama koje se u njima vide.</span><span lang="en">A selection of projects, with what was done and the skills behind each one.</span><span lang="de">Eine Auswahl von Projekten – mit dem Umfang der Arbeit und den eingesetzten Kenntnissen.</span></p>
-  <div class="lock-note no-print"><span class="txt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span><span lang="sr">Pojedini podaci, poput broja telefona i naziva klijenata, dostupni su na zahtjev. Za uvid u zaključane stavke pišite na <a class="mail-small" href="mailto:business@jovanabosancic.dev">business@jovanabosancic.dev</a>.</span><span lang="en">Some details, such as my phone number and client names, are available on request. To view the restricted items, please email <a class="mail-small" href="mailto:business@jovanabosancic.dev">business@jovanabosancic.dev</a>.</span><span lang="de">Einige Angaben, wie meine Telefonnummer und Kundennamen, sind auf Anfrage verfügbar. Für den Zugang zu den geschützten Inhalten schreiben Sie bitte an <a class="mail-small" href="mailto:business@jovanabosancic.dev">business@jovanabosancic.dev</a>.</span></span></span><button type="button" data-open-unlock><span lang="sr">Imam pristupni kod</span><span lang="en">I have an access code</span><span lang="de">Ich habe einen Zugangscode</span></button></div>
+  <div class="lock-note no-print"><span class="txt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span><span lang="sr">Pojedini podaci, poput broja telefona i naziva klijenata, dostupni su na zahtjev. Za uvid u zaključane stavke pišite na <a class="mail-small" href="mailto:info@jovanabosancic.dev">info@jovanabosancic.dev</a>.</span><span lang="en">Some details, such as my phone number and client names, are available on request. To view the restricted items, please email <a class="mail-small" href="mailto:info@jovanabosancic.dev">info@jovanabosancic.dev</a>.</span><span lang="de">Einige Angaben, wie meine Telefonnummer und Kundennamen, sind auf Anfrage verfügbar. Für den Zugang zu den geschützten Inhalten schreiben Sie bitte an <a class="mail-small" href="mailto:info@jovanabosancic.dev">info@jovanabosancic.dev</a>.</span></span></span><button type="button" data-open-unlock><span lang="sr">Imam pristupni kod</span><span lang="en">I have an access code</span><span lang="de">Ich habe einen Zugangscode</span></button></div>
   <div style="height:30px"></div>
 
   <article class="project">
@@ -396,7 +458,7 @@ footer small { font-family: var(--mono); font-size: 12px; color: #9a97a3; }
   </article>
 
   <article class="project">
-    <div class="logo-panel"><img data-lock-img="in_img" src="insane-logo-blur.png" alt=""><button type="button" class="lock-badge" data-open-unlock><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span lang="sr">Dostupno na zahtjev</span><span lang="en">Available on request</span><span lang="de">Auf Anfrage verfügbar</span></button></div>
+    <div class="logo-panel"><img src="klijent-japan.png" alt="Logo"></div>
     <div class="body">
       <div class="head">
         <div>
@@ -432,9 +494,7 @@ footer small { font-family: var(--mono); font-size: 12px; color: #9a97a3; }
 </section>
 
 <section class="view" id="view-services" hidden>
-  <p class="eyebrow">// <span lang="sr">usluge</span><span lang="en">services</span><span lang="de">Leistungen</span></p>
-  <h1 style="margin:10px 0 18px"><span lang="sr">Šta radim</span><span lang="en">What I do</span><span lang="de">Was ich mache</span></h1>
-  <p class="intro" style="margin-bottom:34px"><span lang="sr">Spajam programiranje i dizajn: rješenje mora raditi besprijekorno, ali i lijepo izgledati.</span><span lang="en">I combine programming and design: a solution has to work flawlessly and look good doing it.</span><span lang="de">Ich verbinde Programmierung und Design: Eine Lösung muss einwandfrei funktionieren und dabei gut aussehen.</span></p>
+  <h1 class="lead-title"><span lang="sr">Programiranje i dizajn u cjelini: rješenje mora raditi besprijekorno, ali i isto tako izgledati.</span><span lang="en">Programming and design as one: a solution must work flawlessly – and look just as flawless.</span><span lang="de">Programmierung und Design als Einheit: Eine Lösung muss einwandfrei funktionieren – und genauso aussehen.</span></h1>
   <div class="cards">
     <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg></div><h3><span lang="sr">Web sajtovi</span><span lang="en">Websites</span><span lang="de">Websites</span></h3><p><span lang="sr">Od prezentacija za male firme do sajtova sa admin panelom. Brzi, pregledni i prilagođeni telefonu, na jednom ili više jezika.</span><span lang="en">From small-business sites to websites with admin panels. Fast, clear and mobile-friendly, in one language or several.</span><span lang="de">Von Auftritten für kleine Unternehmen bis zu Websites mit Admin-Panel. Schnell, übersichtlich und mobiloptimiert – ein- oder mehrsprachig.</span></p></div>
     <div class="card"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></div><h3><span lang="sr">Web i mobilne aplikacije</span><span lang="en">Web &amp; mobile apps</span><span lang="de">Web- &amp; Mobile-Apps</span></h3><p><span lang="sr">Aplikacije koje rješavaju konkretan problem, sa posebnom pažnjom na izgled i jednostavnost korištenja.</span><span lang="en">Apps that solve a concrete problem, with special care for design and ease of use.</span><span lang="de">Apps, die ein konkretes Problem lösen – mit besonderem Augenmerk auf Design und Bedienbarkeit.</span></p></div>
@@ -448,25 +508,25 @@ footer small { font-family: var(--mono); font-size: 12px; color: #9a97a3; }
 
 <section class="view" id="view-contact" hidden>
   <p class="eyebrow">// <span lang="sr">kontakt</span><span lang="en">contact</span><span lang="de">Kontakt</span></p>
-  <h1 style="margin:10px 0 18px"><span lang="sr">Hajde da <em>sarađujemo</em></span><span lang="en">Let's work <em>together</em></span><span lang="de">Lassen Sie uns <em>zusammenarbeiten</em></span></h1>
+  <h1 style="margin:10px 0 18px"><span lang="sr"><em>Saradnje</em></span><span lang="en"><em>Collaborations</em></span><span lang="de"><em>Zusammenarbeit</em></span></h1>
   <p class="intro" style="margin-bottom:28px"><span lang="sr">Imate projekat ili poziciju za mene? Pišite mi, odgovaram brzo.</span><span lang="en">Have a project or a role in mind? Write to me, I reply quickly.</span><span lang="de">Haben Sie ein Projekt oder eine Stelle für mich? Schreiben Sie mir – ich antworte schnell.</span></p>
-  <a class="mail" href="mailto:business@jovanabosancic.dev">business@jovanabosancic.dev</a>
+  <a class="mail" href="mailto:work@jovanabosancic.dev">work@jovanabosancic.dev</a>
   <div class="contact-list">
     <span><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M5 4h3.5l1.8 4.5-2.3 1.4a11 11 0 0 0 6.1 6.1l1.4-2.3L20 15.5V19a1.5 1.5 0 0 1-1.6 1.5A16.5 16.5 0 0 1 3.5 5.6 1.5 1.5 0 0 1 5 4z"/></svg></span><button type="button" class="locked" data-lock="phone" aria-label="Locked"><span class="blurtext" aria-hidden="true">+387 00 000 000</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button></span>
     <a href="https://jovanabosancic.dev"><span class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg></span>jovanabosancic.dev</a>
     <a href="https://www.linkedin.com/in/jovana-bosancic-74ba67257/" target="_blank" rel="noopener"><span class="ci"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13M7.12 20.45H3.56V9h3.56zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0"/></svg></span>LinkedIn · Jovana Bosančić</a>
     <a href="https://github.com/jovanagit1" target="_blank" rel="noopener"><span class="ci"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.25.45-2.28 1.18-3.08-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.58.23 2.75.11 3.04.74.8 1.18 1.83 1.18 3.08 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg></span>github.com/jovanagit1</a>
   </div>
-  <div class="lock-note no-print"><span class="txt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span><span lang="sr">Pojedini podaci, poput broja telefona i naziva klijenata, dostupni su na zahtjev. Za uvid u zaključane stavke pišite na <a class="mail-small" href="mailto:business@jovanabosancic.dev">business@jovanabosancic.dev</a>.</span><span lang="en">Some details, such as my phone number and client names, are available on request. To view the restricted items, please email <a class="mail-small" href="mailto:business@jovanabosancic.dev">business@jovanabosancic.dev</a>.</span><span lang="de">Einige Angaben, wie meine Telefonnummer und Kundennamen, sind auf Anfrage verfügbar. Für den Zugang zu den geschützten Inhalten schreiben Sie bitte an <a class="mail-small" href="mailto:business@jovanabosancic.dev">business@jovanabosancic.dev</a>.</span></span></span><button type="button" data-open-unlock><span lang="sr">Imam pristupni kod</span><span lang="en">I have an access code</span><span lang="de">Ich habe einen Zugangscode</span></button></div>
+  <div class="lock-note no-print"><span class="txt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span><span lang="sr">Pojedini podaci, poput broja telefona i naziva klijenata, dostupni su na zahtjev. Za uvid u zaključane stavke pišite na <a class="mail-small" href="mailto:info@jovanabosancic.dev">info@jovanabosancic.dev</a>.</span><span lang="en">Some details, such as my phone number and client names, are available on request. To view the restricted items, please email <a class="mail-small" href="mailto:info@jovanabosancic.dev">info@jovanabosancic.dev</a>.</span><span lang="de">Einige Angaben, wie meine Telefonnummer und Kundennamen, sind auf Anfrage verfügbar. Für den Zugang zu den geschützten Inhalten schreiben Sie bitte an <a class="mail-small" href="mailto:info@jovanabosancic.dev">info@jovanabosancic.dev</a>.</span></span></span><button type="button" data-open-unlock><span lang="sr">Imam pristupni kod</span><span lang="en">I have an access code</span><span lang="de">Ich habe einen Zugangscode</span></button></div>
 </section>
   </div></main>
-  <footer><div class="name">Jovana Bosančić</div><small>© <span id="year">2026</span> · jovanabosancic.dev · Banja Luka</small></footer>
+  <footer><div class="finner"><div class="name">Jovana Bosančić</div><small>© <span id="year">2026</span> · jovanabosancic.dev · Banja Luka</small></div></footer>
 
 <div class="modal" id="unlockModal" hidden role="dialog" aria-modal="true" aria-labelledby="unlockTitle">
   <div class="modal-box">
     <button class="modal-close" type="button" data-close-unlock aria-label="Close">×</button>
     <h3 id="unlockTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span lang="sr">Zaključani sadržaj</span><span lang="en">Restricted content</span><span lang="de">Geschützter Inhalt</span></h3>
-    <p><span lang="sr">Pojedini podaci, poput broja telefona i naziva klijenata, dostupni su na zahtjev. Za uvid u zaključane stavke pišite na <a class="mail-small" href="mailto:business@jovanabosancic.dev">business@jovanabosancic.dev</a>.</span><span lang="en">Some details, such as my phone number and client names, are available on request. To view the restricted items, please email <a class="mail-small" href="mailto:business@jovanabosancic.dev">business@jovanabosancic.dev</a>.</span><span lang="de">Einige Angaben, wie meine Telefonnummer und Kundennamen, sind auf Anfrage verfügbar. Für den Zugang zu den geschützten Inhalten schreiben Sie bitte an <a class="mail-small" href="mailto:business@jovanabosancic.dev">business@jovanabosancic.dev</a>.</span></p>
+    <p><span lang="sr">Pojedini podaci, poput broja telefona i naziva klijenata, dostupni su na zahtjev. Za uvid u zaključane stavke pišite na <a class="mail-small" href="mailto:info@jovanabosancic.dev">info@jovanabosancic.dev</a>.</span><span lang="en">Some details, such as my phone number and client names, are available on request. To view the restricted items, please email <a class="mail-small" href="mailto:info@jovanabosancic.dev">info@jovanabosancic.dev</a>.</span><span lang="de">Einige Angaben, wie meine Telefonnummer und Kundennamen, sind auf Anfrage verfügbar. Für den Zugang zu den geschützten Inhalten schreiben Sie bitte an <a class="mail-small" href="mailto:info@jovanabosancic.dev">info@jovanabosancic.dev</a>.</span></p>
     <form class="modal-form" id="unlockForm">
       <input id="unlockCode" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX" aria-label="Code">
       <button class="btn accent" type="submit"><span lang="sr">Otključaj</span><span lang="en">Unlock</span><span lang="de">Entsperren</span></button>
@@ -474,7 +534,7 @@ footer small { font-family: var(--mono); font-size: 12px; color: #9a97a3; }
     <p class="modal-err" id="unlockErr" hidden><span lang="sr">Pogrešan kod. Provjerite ga i pokušajte ponovo.</span><span lang="en">Incorrect code. Please check it and try again.</span><span lang="de">Falscher Code. Bitte prüfen Sie ihn und versuchen Sie es erneut.</span></p>
   </div>
 </div>
-  <script type="application/json" id="locked-data">{"salt": "DiN2pnSUreQCmXVDlok2cw==", "iv": "XnQHFhscxBlHO+kO", "ct": "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", "iter": 150000}</script>
+  <script type="application/json" id="locked-data">{"salt": "jBcIsITil5KHlSlVG2NpBQ==", "iv": "p2n1iHw8ojH0lzcJ", "ct": "LvhxROKuCBcKciNYAzm5jpdphGMWCOBwafYjtdTGwDSvbfCp2opPPaqtH/V5QR+l3eKikHsFjdASL0vzYllRg0UhBoZMCsgqdBzRnxXxl+bwRJCJ3mdO34NtcDv6rEOJwkZCZzAM7VtDn0lv77ueoaYbFyBZAlIK13zhP22nfFZP8zm860fpVtTS2axhanOYm3kODEZ02MUi3pSbDD45DQWzOhD2Qw5zTczguILdsokeolDKB6aoUXZUZ8nHf6L6mtiFcQazaTF7nM69ZGGW+ilvXrYEMkRIAovZQES847aYYiLqtwqgrHOEChRByn6JqhUmZ2X9Jha3IrRvnySmpzrWWv1EM3DklO/SwjIWA8AQqfrPDGiKDaDE4U+7V2nvXbINsOxwkOWzXm/BTEKrXnIHMCm3V+hxJP6krhJKiwqIX5afUwi0O/LTcJ0RusgLTlk1N7EWvmUzrsFxa6s3rHoJpDrJ+C47ZPPz", "iter": 150000}</script>
   <script>
 (function () {
   var root = document.documentElement;
@@ -491,7 +551,7 @@ footer small { font-family: var(--mono); font-size: 12px; color: #9a97a3; }
   }
   var nav = (navigator.language || "").toLowerCase();
   var guess = /^(sr|bs|hr|me)/.test(nav) ? "sr" : /^de/.test(nav) ? "de" : "en";
-  setLang(params.get("lang") || load("lang") || guess);
+  setLang(params.get("lang") || load("lang") || "en");
   document.querySelectorAll("[data-set-lang]").forEach(function (b) {
     b.addEventListener("click", function () { setLang(b.getAttribute("data-set-lang")); });
   });
@@ -504,6 +564,27 @@ footer small { font-family: var(--mono); font-size: 12px; color: #9a97a3; }
     root.setAttribute("data-theme", t); store("theme", t);
   });
 
+  /* padajući meniji: lijevo jezik i kontakt, desno navigacija */
+  var dds = Array.prototype.slice.call(document.querySelectorAll("[data-dd]"));
+  var finePointer = !!(window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches);
+  function setOpen(d, open) { d.classList.toggle("open", open); d.querySelector(".dd-btn").setAttribute("aria-expanded", open ? "true" : "false"); }
+  function closeDropdowns(except) { dds.forEach(function (d) { if (d !== except) setOpen(d, false); }); }
+  dds.forEach(function (d) {
+    d.querySelector(".dd-btn").addEventListener("click", function (e) {
+      e.stopPropagation(); var open = !d.classList.contains("open"); closeDropdowns(d); setOpen(d, open);
+    });
+    d.addEventListener("mouseleave", function () { d.classList.remove("nohover"); if (finePointer) setOpen(d, false); });
+    d.querySelectorAll(".dd-panel a").forEach(function (a) {
+      a.addEventListener("click", function () { d.classList.add("nohover"); closeDropdowns(); });
+    });
+  });
+  document.addEventListener("click", function (e) { if (!e.target.closest("[data-dd]")) closeDropdowns(); });
+  window.addEventListener("scroll", function () { closeDropdowns(); }, { passive: true });
+  ["wheel", "touchstart"].forEach(function (t) {
+    window.addEventListener(t, function (e) { if (!(e.target && e.target.closest && e.target.closest("[data-dd]"))) closeDropdowns(); }, { passive: true });
+  });
+  setTimeout(function () { dds.forEach(function (d) { setOpen(d, true); }); }, 700);
+
   /* stranice */
   var views = ["home", "cv", "projects", "services", "contact"];
   function show() {
@@ -513,12 +594,11 @@ footer small { font-family: var(--mono); font-size: 12px; color: #9a97a3; }
     document.querySelectorAll(".menu a").forEach(function (a) {
       if (a.getAttribute("data-view") === v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     });
-    document.body.classList.remove("menu-open");
+    closeDropdowns();
     window.scrollTo(0, 0);
   }
   window.addEventListener("hashchange", show);
   show();
-  document.getElementById("burger").addEventListener("click", function () { document.body.classList.toggle("menu-open"); });
 
   /* ---------- zaključane stavke (AES-GCM, ključ iz pristupnog koda) ---------- */
   var box = JSON.parse(document.getElementById("locked-data").textContent);
@@ -557,7 +637,7 @@ footer small { font-family: var(--mono); font-size: 12px; color: #9a97a3; }
     if (e.target.closest("[data-open-unlock], .locked")) { e.preventDefault(); openModal(); }
     if (e.target.closest("[data-close-unlock]") || e.target === modal) closeModal();
   });
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeModal(); closeDropdowns(); } });
   document.getElementById("unlockForm").addEventListener("submit", async function (e) {
     e.preventDefault();
     if (await tryCode(document.getElementById("unlockCode").value)) closeModal();
